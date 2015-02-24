@@ -5,7 +5,7 @@ This plugin is a basic implementation of Stripe and Apple Pay.
 
 ## Installation
 
-Cordova plugin add https://github.com/fan-si/cordova-plugin-applepay.git
+    cordova plugin add https://github.com/fan-si/cordova-plugin-applepay.git
 
 ## Supported Platforms
 
@@ -19,7 +19,7 @@ Cordova plugin add https://github.com/fan-si/cordova-plugin-applepay.git
 
 ## ApplePay.getAllowsApplePay
 
-Returns successfully if the device is setup for Apple Pay
+Returns successfully if the device is setup for Apple Pay (correct software version, correct hardware & has card added).
 
     ApplePay.getAllowsApplePay(successCallback, errorCallback);
 
@@ -31,7 +31,7 @@ Set your Apple-given merchant ID.
 
 ## ApplePay.getStripeToken
 
-Request a stripe token to send to the backend.
+Request a stripe token for an Apple Pay card.
 
     ApplePay.getStripeToken(successCallback, errorCallback, amount, description, currency);
 
