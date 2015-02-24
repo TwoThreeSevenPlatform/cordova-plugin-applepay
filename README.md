@@ -1,11 +1,11 @@
 # si.fan.applepay
 
-This plugin is a basic implementation of Stipe and Apple Pay 
+This plugin is a basic implementation of Stripe and Apple Pay. 
 
 
 ## Installation
 
-cordova plugin add https://github.com/fan-si/cordova-plugin-applepay.git
+Cordova plugin add https://github.com/fan-si/cordova-plugin-applepay.git
 
 ## Supported Platforms
 
@@ -19,7 +19,7 @@ cordova plugin add https://github.com/fan-si/cordova-plugin-applepay.git
 
 ## ApplePay.getAllowsApplePay
 
-returns successfully if the device is setup for Apple Pay
+Returns successfully if the device is setup for Apple Pay
 
     ApplePay.getAllowsApplePay(successCallback, errorCallback);
 
