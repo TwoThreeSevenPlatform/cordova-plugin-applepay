@@ -57,7 +57,7 @@ NSString * const StripePublishableKey = @"pk_test_4ObuvKrPHRA5tFWNpi2MB1pk";
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString: @"user has apple pay"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } else {
-#ifdef DEBUG
+#if DEBUG
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString: @"in debug mode, simulating apple pay"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 #else
@@ -93,7 +93,7 @@ NSString * const StripePublishableKey = @"pk_test_4ObuvKrPHRA5tFWNpi2MB1pk";
     callbackId = command.callbackId;
     
 
-#ifdef DEBUG
+#if DEBUG
     STPTestPaymentAuthorizationViewController *paymentController;
     paymentController = [[STPTestPaymentAuthorizationViewController alloc]
                              initWithPaymentRequest:request];
@@ -131,7 +131,7 @@ NSString * const StripePublishableKey = @"pk_test_4ObuvKrPHRA5tFWNpi2MB1pk";
         [self.viewController dismissViewControllerAnimated:YES completion:nil];
     };
     
-#ifdef DEBUG
+#if DEBUG
     STPCard *card = [STPCard new];
     card.number = @"4242424242424242";
     card.expMonth = 12;
