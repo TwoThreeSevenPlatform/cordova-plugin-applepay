@@ -3,11 +3,16 @@
 #import "STPTestPaymentAuthorizationViewController.h"
 #import <PassKit/PassKit.h>
 #import <UIKit/UIKit.h>
+#import <objc/runtime.h>
+#import "Stripe.h"
+
+NSString * const StripePublishableKey = @"pk_test_4ObuvKrPHRA5tFWNpi2MB1pk";
 
 @implementation CDVApplePay
 
 - (CDVPlugin*)initWithWebView:(UIWebView*)theWebView
 {
+    [Stripe setDefaultPublishableKey:StripePublishableKey];
     self = (CDVApplePay*)[super initWithWebView:(UIWebView*)theWebView];
 
     return self;
