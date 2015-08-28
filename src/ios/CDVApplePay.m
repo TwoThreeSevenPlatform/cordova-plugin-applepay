@@ -5,15 +5,15 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-NSString * const StripePublishableKey = @"pk_test_4ObuvKrPHRA5tFWNpi2MB1pk";
 
 @implementation CDVApplePay
 
 - (CDVPlugin*)initWithWebView:(UIWebView*)theWebView
 {
+    NSString * StripePublishableKey = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"StripePublishableKey"];
     [Stripe setDefaultPublishableKey:StripePublishableKey];
     self = (CDVApplePay*)[super initWithWebView:(UIWebView*)theWebView];
-
+    
     return self;
 }
 
