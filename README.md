@@ -1,6 +1,6 @@
 # cordova-plugin-applepay
 
-This plugin is a basic implementation of Stripe and Apple Pay. 
+This plugin is a basic implementation of Stripe and Apple Pay with the purpose of returning a useable stripe token.
 
 
 ## Installation
@@ -35,7 +35,7 @@ ApplePay.getAllowsApplePay(successCallback, errorCallback);
 Set your Apple-given merchant ID.
 
 ```js
-ApplePay.setMerchantId(successCallback, errorCallback, "merchant.apple.test");
+ApplePay.setMerchantId(successCallback, errorCallback, 'merchant.apple.test');
 ```
 
 #### ApplePay.getStripeToken
@@ -49,13 +49,18 @@ ApplePay.getStripeToken(successCallback, errorCallback, amount, description, cur
 ## Example
 
 ```js
-function onError(err) {
-	alert(JSON.stringify(err));
-}
-function onSuccess(response) {
-	alert(response);
-}
+ApplePay.setMerchantId('merchant.apple.test');
 
-ApplePay.setMerchantId("merchant.apple.test");
-ApplePay.getStripeToken(onSuccess, onError, 10.00, "Delicious Cake", "USD");
+ApplePay.getAllowsApplePay(function() {
+
+	ApplePay.getStripeToken(function(token) {
+		alert('Your token is: ' + token);
+	}, function() {
+		alert('Error getting payment info');
+	}, 10.00,'Delicious Cake', 'USD');
+
+}, function() {
+	alert('User does not have apple pay available');
+});
+
 ```
