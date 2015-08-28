@@ -19,12 +19,12 @@
 
 - (void)dealloc
 {
-
+    
 }
 
 - (void)onReset
 {
-
+    
 }
 
 - (void)setMerchantId:(CDVInvokedUrlCommand*)command
@@ -68,37 +68,29 @@
 
 - (void)getStripeToken:(CDVInvokedUrlCommand*)command
 {
-
+    
     if (merchantId == nil) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString: @"Please call setMerchantId() with your Apple-given merchant ID."];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
-
+    
     PKPaymentRequest *request = [Stripe
-                             paymentRequestWithMerchantIdentifier:merchantId];
-
+                                 paymentRequestWithMerchantIdentifier:merchantId];
+    
     // Configure your request here.
     NSString *label = [command.arguments objectAtIndex:1];
     NSDecimalNumber *amount = [NSDecimalNumber decimalNumberWithString:[command.arguments objectAtIndex:0]];
     request.paymentSummaryItems = @[
-        [PKPaymentSummaryItem summaryItemWithLabel:label 
-                                          amount:amount]
-    ];
+                                    [PKPaymentSummaryItem summaryItemWithLabel:label
+                                                                        amount:amount]
+                                    ];
     
     NSString *cur = [command.arguments objectAtIndex:2];
     request.currencyCode = cur;
     
     callbackId = command.callbackId;
     
-
-#if DEBUG
-    STPTestPaymentAuthorizationViewController *paymentController;
-    paymentController = [[STPTestPaymentAuthorizationViewController alloc]
-                             initWithPaymentRequest:request];
-    paymentController.delegate = self;
-    [self.viewController presentViewController:paymentController animated:YES completion:nil];
-#else
     if ([Stripe canSubmitPaymentRequest:request]) {
         PKPaymentAuthorizationViewController *paymentController;
         paymentController = [[PKPaymentAuthorizationViewController alloc]
@@ -110,44 +102,38 @@
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
-#endif
+    
 }
 
 - (void)paymentAuthorizationViewController:(PKPaymentAuthorizationViewController *)controller
                        didAuthorizePayment:(PKPayment *)payment
                                 completion:(void (^)(PKPaymentAuthorizationStatus))completion {
+    [self handlePaymentAuthorizationWithPayment:payment completion:completion];
+}
 
-    void(^tokenBlock)(STPToken *token, NSError *error) = ^void(STPToken *token, NSError *error) {
+- (void)handlePaymentAuthorizationWithPayment:(PKPayment *)payment completion:(void (^)(PKPaymentAuthorizationStatus))completion {
+    
+    [[STPAPIClient sharedClient] createTokenWithPayment:payment completion:^(STPToken *token, NSError *error) {
         if (error) {
+            completion(PKPaymentAuthorizationStatusFailure);
             CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString: @"couldn't get a stripe token from STPAPIClient"];
             [self.commandDelegate sendPluginResult:result callbackId:callbackId];
             return;
-        }
-        else {
+        } else {
+            
+            completion(PKPaymentAuthorizationStatusSuccess);
             CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString: token.tokenId];
             [self.commandDelegate sendPluginResult:result callbackId:callbackId];
         }
-        [self.viewController dismissViewControllerAnimated:YES completion:nil];
-    };
-    
-#if DEBUG
-    STPCard *card = [STPCard new];
-    card.number = @"4242424242424242";
-    card.expMonth = 12;
-    card.expYear = 2020;
-    card.cvc = @"123";
-    [[STPAPIClient sharedClient] createTokenWithCard:card completion:tokenBlock];
-#else
-    [[STPAPIClient sharedClient] createTokenWithPayment:payment
-                    operationQueue:[NSOperationQueue mainQueue]
-                        completion:tokenBlock];
-#endif
+        
+    }];
 }
-
-- (void)paymentAuthorizationViewControllerDidFinish:(PKPaymentAuthorizationViewController *)controller {
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString: @"user cancelled apple pay"];
-    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
-    [self.viewController dismissViewControllerAnimated:YES completion:nil];
-}
-
+ 
+ 
+ - (void)paymentAuthorizationViewControllerDidFinish:(PKPaymentAuthorizationViewController *)controller {
+     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString: @"user cancelled apple pay"];
+     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+     [self.viewController dismissViewControllerAnimated:YES completion:nil];
+ }
+ 
 @end
