@@ -42,7 +42,10 @@ ApplePay.setMerchantId(successCallback, errorCallback, 'merchant.apple.test');
 
 #### ApplePay.getStripeToken
 
-Request a stripe token for an Apple Pay card.
+Request a stripe token for an Apple Pay card. 
+- amount (string)
+- description (string)
+- currency (uppercase string)
 
 ```js
 ApplePay.getStripeToken(successCallback, errorCallback, amount, description, currency);
@@ -59,7 +62,7 @@ ApplePay.getAllowsApplePay(function() {
 		alert('Your token is: ' + token);
 	}, function() {
 		alert('Error getting payment info');
-	}, 10.00,'Delicious Cake', 'USD');
+	}, '10.00', 'Delicious Cake', 'USD');
 
 }, function() {
 	alert('User does not have apple pay available');
