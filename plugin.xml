@@ -35,6 +35,10 @@ xmlns:android="http://schemas.android.com/apk/res/android"
             <string>$STRIPE_PUBLISHABLE_KEY</string>
         </config-file>
 		
+		<config-file target="*-Info.plist" parent="ApplePayMerchant">
+            <string>$APPLE_PAY_MERCHANT</string>
+        </config-file>
+		
         <config-file target="*.entitlements" parent="com.apple.developer.in-app-payments">
 			<array>
 				<string>$APPLE_PAY_MERCHANT</string>

@@ -34,7 +34,7 @@ ApplePay.getAllowsApplePay(successCallback, errorCallback);
 
 #### ApplePay.setMerchantId
 
-Set your Apple-given merchant ID.
+Set your Apple-given merchant ID. This overrides the value obtained from **ApplePayMerchant** in **Info.plist**.
 
 ```js
 ApplePay.setMerchantId(successCallback, errorCallback, 'merchant.apple.test');
