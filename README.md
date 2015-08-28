@@ -46,5 +46,4 @@ Request a stripe token for an Apple Pay card.
         alert(response);
     }
 
-    ApplePay.getStripeToken(onSuccess, onError, 10.00, "Delicious Cake", "USD);
-
+    ApplePay.getStripeToken(onSuccess, onError, 10.00, "Delicious Cake", "USD");
