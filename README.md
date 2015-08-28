@@ -9,7 +9,9 @@ This plugin is a basic implementation of Stripe and Apple Pay with the purpose o
 2. In your Xcode project, go to **Capabilities** and enable **Apple Pay**
 3. Install the plugin
 ```sh
-cordova plugin add https://github.com/arzynik/cordova-plugin-applepay  --variable STRIPE_PUBLISHABLE_KEY="pk_test_stripekey" --variable APPLE_PAY_MERCHANT="merchant.apple.test"
+cordova plugin add https://github.com/arzynik/cordova-plugin-applepay  \
+	--variable STRIPE_PUBLISHABLE_KEY="pk_test_stripekey" \
+	--variable APPLE_PAY_MERCHANT="merchant.apple.test"
 ```
 
 ## Supported Platforms
