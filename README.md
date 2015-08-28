@@ -1,11 +1,16 @@
-# si.fan.applepay
+# cordova-plugin-applepay
 
 This plugin is a basic implementation of Stripe and Apple Pay. 
 
 
 ## Installation
 
-    cordova plugin add https://github.com/fan-si/cordova-plugin-applepay.git
+1. Follow the steps on https://stripe.com/docs/mobile/apple-pay to get your certs generated
+2. In your Xcode project, go to **Capabilities** and enable **Apple Pay**
+3. Install the plugin
+```sh
+cordova plugin add https://github.com/arzynik/cordova-plugin-applepay  --variable STRIPE_PUBLISHABLE_KEY="pk_test_stripekey" --variable APPLE_PAY_MERCHANT="merchant.apple.test"
+```
 
 ## Supported Platforms
 
@@ -17,33 +22,40 @@ This plugin is a basic implementation of Stripe and Apple Pay.
 - ApplePay.setMerchantId
 - ApplePay.getStripeToken
 
-## ApplePay.getAllowsApplePay
+#### ApplePay.getAllowsApplePay
 
 Returns successfully if the device is setup for Apple Pay (correct software version, correct hardware & has card added).
 
-    ApplePay.getAllowsApplePay(successCallback, errorCallback);
+```js
+ApplePay.getAllowsApplePay(successCallback, errorCallback);
+```
 
-## ApplePay.setMerchantId
+#### ApplePay.setMerchantId
 
 Set your Apple-given merchant ID.
 
-    ApplePay.setMerchantId(successCallback, errorCallback, "merchant.my.id");
+```js
+ApplePay.setMerchantId(successCallback, errorCallback, "merchant.apple.test");
+```
 
-## ApplePay.getStripeToken
+#### ApplePay.getStripeToken
 
 Request a stripe token for an Apple Pay card.
 
-    ApplePay.getStripeToken(successCallback, errorCallback, amount, description, currency);
+```js
+ApplePay.getStripeToken(successCallback, errorCallback, amount, description, currency);
+```
 
-### Example
+## Example
 
-    ApplePay.setMerchantId("merchant.apple.test");
+```js
+function onError(err) {
+	alert(JSON.stringify(err));
+}
+function onSuccess(response) {
+	alert(response);
+}
 
-    function onError(err) {
-        alert(JSON.stringify(err));
-    }
-    function onSuccess(response) {
-        alert(response);
-    }
-
-    ApplePay.getStripeToken(onSuccess, onError, 10.00, "Delicious Cake", "USD");
+ApplePay.setMerchantId("merchant.apple.test");
+ApplePay.getStripeToken(onSuccess, onError, 10.00, "Delicious Cake", "USD");
+```
