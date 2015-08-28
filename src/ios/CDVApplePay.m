@@ -1,10 +1,9 @@
 #import "CDVApplePay.h"
-#import "Stripe.h"
-#import "STPTestPaymentAuthorizationViewController.h"
+#import <Stripe/Stripe.h>
+#import <Stripe/STPAPIClient.h>
 #import <PassKit/PassKit.h>
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#import "Stripe.h"
 
 NSString * const StripePublishableKey = @"pk_test_4ObuvKrPHRA5tFWNpi2MB1pk";
 
