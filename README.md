@@ -51,6 +51,20 @@ Request a stripe token for an Apple Pay card.
 ApplePay.getStripeToken(successCallback, errorCallback, amount, description, currency);
 ```
 
+##### Response
+```json
+{
+	"token": "sometoken",
+	"card": {
+		"id": "cardid",
+		"brand": "Visa",
+		"last4": "1234",
+		"exp_month": "01",
+		"exp_year": "2050"
+	}
+}
+```
+
 ## Example
 
 ```js
