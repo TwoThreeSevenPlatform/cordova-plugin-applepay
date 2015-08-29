@@ -145,6 +145,7 @@
             }
             
             NSDictionary* card = @{
+               @"id": token.card.cardId,
                @"brand": brand,
                @"last4": [NSString stringWithFormat:@"%@", token.card.last4],
                @"exp_month": [NSString stringWithFormat:@"%lu", token.card.expMonth],
