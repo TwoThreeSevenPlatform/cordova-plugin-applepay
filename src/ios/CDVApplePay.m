@@ -58,13 +58,8 @@
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString: @"user has apple pay"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } else {
-#if DEBUG
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString: @"in debug mode, simulating apple pay"];
-        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-#else
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString: @"user does not have apple pay"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-#endif
     }
 }
 
