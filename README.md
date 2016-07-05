@@ -1,11 +1,18 @@
-# si.fan.applepay
+# cordova-plugin-applepay
 
-This plugin is a basic implementation of Stripe and Apple Pay. 
+This plugin is a basic implementation of Stripe and Apple Pay with the purpose of returning a useable stripe token.
 
 
 ## Installation
 
-    cordova plugin add https://github.com/fan-si/cordova-plugin-applepay.git
+1. Follow the steps on https://stripe.com/docs/mobile/apple-pay to get your certs generated
+2. In your Xcode project, go to **Capabilities** and enable **Apple Pay**
+3. Install the plugin
+```sh
+cordova plugin add https://github.com/arzynik/cordova-plugin-applepay  \
+	--variable STRIPE_PUBLISHABLE_KEY="pk_test_stripekey" \
+	--variable APPLE_PAY_MERCHANT="merchant.apple.test"
+```
 
 ## Supported Platforms
 
@@ -17,34 +24,62 @@ This plugin is a basic implementation of Stripe and Apple Pay.
 - ApplePay.setMerchantId
 - ApplePay.getStripeToken
 
-## ApplePay.getAllowsApplePay
+#### ApplePay.getAllowsApplePay
 
 Returns successfully if the device is setup for Apple Pay (correct software version, correct hardware & has card added).
 
-    ApplePay.getAllowsApplePay(successCallback, errorCallback);
+```js
+ApplePay.getAllowsApplePay(successCallback, errorCallback);
+```
 
-## ApplePay.setMerchantId
+#### ApplePay.setMerchantId
 
-Set your Apple-given merchant ID.
+Set your Apple-given merchant ID. This overrides the value obtained from **ApplePayMerchant** in **Info.plist**.
 
-    ApplePay.setMerchantId(successCallback, errorCallback, "merchant.my.id");
+```js
+ApplePay.setMerchantId(successCallback, errorCallback, 'merchant.apple.test');
+```
 
-## ApplePay.getStripeToken
+#### ApplePay.getStripeToken
 
-Request a stripe token for an Apple Pay card.
+Request a stripe token for an Apple Pay card. 
+- amount (string)
+- description (string)
+- currency (uppercase string)
 
-    ApplePay.getStripeToken(successCallback, errorCallback, amount, description, currency);
+```js
+ApplePay.getStripeToken(successCallback, errorCallback, amount, description, currency);
+```
 
-### Example
+##### Response
+```json
+{
+	"token": "sometoken",
+	"card": {
+		"id": "cardid",
+		"brand": "Visa",
+		"last4": "1234",
+		"exp_month": "01",
+		"exp_year": "2050"
+	}
+}
+```
 
-    ApplePay.setMerchantId("merchant.apple.test");
+## Example
 
-    function onError(err) {
-        alert(JSON.stringify(err));
-    }
-    function onSuccess(response) {
-        alert(response);
-    }
+```js
+ApplePay.setMerchantId('merchant.apple.test');
 
-    ApplePay.getStripeToken(onSuccess, onError, 10.00, "Delicious Cake", "USD);
+ApplePay.getAllowsApplePay(function() {
 
+	ApplePay.getStripeToken(function(token) {
+		alert('Your token is: ' + token.id);
+	}, function() {
+		alert('Error getting payment info');
+	}, '10.00', 'Delicious Cake', 'USD');
+
+}, function() {
+	alert('User does not have apple pay available');
+});
+
+```

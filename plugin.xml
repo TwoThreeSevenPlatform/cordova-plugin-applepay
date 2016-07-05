@@ -2,13 +2,19 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
 xmlns:rim="http://www.blackberry.com/ns/widgets"
 xmlns:android="http://schemas.android.com/apk/res/android"
-           id="si.fan.applepay"
+           id="cordova-plugin-applepay"
       version="0.0.1">
 
     <name>ApplePay</name>
     <description>Implements Stripe/ApplePay Stuff.</description>
     <keywords>cordova,payment,apple,pay,stripe</keywords>
     <repo>git@github.com:fan-si/cordova-plugin-applepay.git</repo>
+	
+		
+	<preference name="STRIPE_PUBLISHABLE_KEY" />
+	<preference name="APPLE_PAY_MERCHANT" />
+	
+
 
     <platform name="ios">
 
@@ -24,12 +30,27 @@ xmlns:android="http://schemas.android.com/apk/res/android"
 	            <param name="ios-package" value="CDVApplePay"/>
 	        </feature>
         </config-file>
+		
+		<config-file target="*-Info.plist" parent="StripePublishableKey">
+            <string>$STRIPE_PUBLISHABLE_KEY</string>
+        </config-file>
+		
+		<config-file target="*-Info.plist" parent="ApplePayMerchant">
+            <string>$APPLE_PAY_MERCHANT</string>
+        </config-file>
+		
+        <config-file target="*.entitlements" parent="com.apple.developer.in-app-payments">
+			<array>
+				<string>$APPLE_PAY_MERCHANT</string>
+			</array>
+        </config-file>
+		
+		<framework src="src/ios/Stripe.framework" custom="true" />
 
         <framework src="AddressBook.framework" />
         <framework src="PassKit.framework" />
         <framework src="Foundation.framework" />
         <framework src="Security.framework" />
-
     </platform>
     
 </plugin>

@@ -1,31 +1,32 @@
 #import "CDVApplePay.h"
-#import "Stripe.h"
-#import "STPTestPaymentAuthorizationViewController.h"
+#import <Stripe/Stripe.h>
+#import <Stripe/STPAPIClient.h>
+#import <Stripe/STPCardBrand.h>
 #import <PassKit/PassKit.h>
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#import "Stripe.h"
 
-NSString * const StripePublishableKey = @"pk_test_4ObuvKrPHRA5tFWNpi2MB1pk";
 
 @implementation CDVApplePay
 
 - (CDVPlugin*)initWithWebView:(UIWebView*)theWebView
 {
+    NSString * StripePublishableKey = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"StripePublishableKey"];
+    merchantId = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"ApplePayMerchant"];
     [Stripe setDefaultPublishableKey:StripePublishableKey];
     self = (CDVApplePay*)[super initWithWebView:(UIWebView*)theWebView];
-
+    
     return self;
 }
 
 - (void)dealloc
 {
-
+    
 }
 
 - (void)onReset
 {
-
+    
 }
 
 - (void)setMerchantId:(CDVInvokedUrlCommand*)command
@@ -57,49 +58,36 @@ NSString * const StripePublishableKey = @"pk_test_4ObuvKrPHRA5tFWNpi2MB1pk";
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString: @"user has apple pay"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } else {
-#if DEBUG
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString: @"in debug mode, simulating apple pay"];
-        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-#else
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString: @"user does not have apple pay"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-#endif
     }
 }
 
 - (void)getStripeToken:(CDVInvokedUrlCommand*)command
 {
-
+    
     if (merchantId == nil) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString: @"Please call setMerchantId() with your Apple-given merchant ID."];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
-
+    
     PKPaymentRequest *request = [Stripe
-                             paymentRequestWithMerchantIdentifier:merchantId];
-
+                                 paymentRequestWithMerchantIdentifier:merchantId];
+    
     // Configure your request here.
     NSString *label = [command.arguments objectAtIndex:1];
     NSDecimalNumber *amount = [NSDecimalNumber decimalNumberWithString:[command.arguments objectAtIndex:0]];
     request.paymentSummaryItems = @[
-        [PKPaymentSummaryItem summaryItemWithLabel:label 
-                                          amount:amount]
-    ];
+                                    [PKPaymentSummaryItem summaryItemWithLabel:label
+                                                                        amount:amount]
+                                    ];
     
     NSString *cur = [command.arguments objectAtIndex:2];
     request.currencyCode = cur;
     
     callbackId = command.callbackId;
     
-
-#if DEBUG
-    STPTestPaymentAuthorizationViewController *paymentController;
-    paymentController = [[STPTestPaymentAuthorizationViewController alloc]
-                             initWithPaymentRequest:request];
-    paymentController.delegate = self;
-    [self.viewController presentViewController:paymentController animated:YES completion:nil];
-#else
     if ([Stripe canSubmitPaymentRequest:request]) {
         PKPaymentAuthorizationViewController *paymentController;
         paymentController = [[PKPaymentAuthorizationViewController alloc]
@@ -111,44 +99,77 @@ NSString * const StripePublishableKey = @"pk_test_4ObuvKrPHRA5tFWNpi2MB1pk";
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
-#endif
+    
 }
 
 - (void)paymentAuthorizationViewController:(PKPaymentAuthorizationViewController *)controller
                        didAuthorizePayment:(PKPayment *)payment
                                 completion:(void (^)(PKPaymentAuthorizationStatus))completion {
+    [self handlePaymentAuthorizationWithPayment:payment completion:completion];
+}
 
-    void(^tokenBlock)(STPToken *token, NSError *error) = ^void(STPToken *token, NSError *error) {
+- (void)handlePaymentAuthorizationWithPayment:(PKPayment *)payment completion:(void (^)(PKPaymentAuthorizationStatus))completion {
+    
+    [[STPAPIClient sharedClient] createTokenWithPayment:payment completion:^(STPToken *token, NSError *error) {
         if (error) {
+            completion(PKPaymentAuthorizationStatusFailure);
             CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString: @"couldn't get a stripe token from STPAPIClient"];
             [self.commandDelegate sendPluginResult:result callbackId:callbackId];
             return;
-        }
-        else {
-            CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString: token.tokenId];
+        } else {
+
+            NSString* brand;
+            
+            switch (token.card.brand) {
+                case STPCardBrandVisa:
+                    brand = @"Visa";
+                    break;
+                case STPCardBrandAmex:
+                    brand = @"American Express";
+                    break;
+                case STPCardBrandMasterCard:
+                    brand = @"MasterCard";
+                    break;
+                case STPCardBrandDiscover:
+                    brand = @"Discover";
+                    break;
+                case STPCardBrandJCB:
+                    brand = @"JCB";
+                    break;
+                case STPCardBrandDinersClub:
+                    brand = @"Diners Club";
+                    break;
+                case STPCardBrandUnknown:
+                    brand = @"Unknown";
+                    break;
+            }
+            
+            NSDictionary* card = @{
+               @"id": token.card.cardId,
+               @"brand": brand,
+               @"last4": [NSString stringWithFormat:@"%@", token.card.last4],
+               @"exp_month": [NSString stringWithFormat:@"%lu", token.card.expMonth],
+               @"exp_year": [NSString stringWithFormat:@"%lu", token.card.expYear]
+           };
+            
+            NSDictionary* message = @{
+               @"id": token.tokenId,
+               @"card": card
+            };
+            
+            completion(PKPaymentAuthorizationStatusSuccess);
+            CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: message];
             [self.commandDelegate sendPluginResult:result callbackId:callbackId];
         }
-        [self.viewController dismissViewControllerAnimated:YES completion:nil];
-    };
-    
-#if DEBUG
-    STPCard *card = [STPCard new];
-    card.number = @"4242424242424242";
-    card.expMonth = 12;
-    card.expYear = 2020;
-    card.cvc = @"123";
-    [[STPAPIClient sharedClient] createTokenWithCard:card completion:tokenBlock];
-#else
-    [[STPAPIClient sharedClient] createTokenWithPayment:payment
-                    operationQueue:[NSOperationQueue mainQueue]
-                        completion:tokenBlock];
-#endif
+        
+    }];
 }
-
-- (void)paymentAuthorizationViewControllerDidFinish:(PKPaymentAuthorizationViewController *)controller {
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString: @"user cancelled apple pay"];
-    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
-    [self.viewController dismissViewControllerAnimated:YES completion:nil];
-}
-
+ 
+ 
+ - (void)paymentAuthorizationViewControllerDidFinish:(PKPaymentAuthorizationViewController *)controller {
+     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString: @"user cancelled apple pay"];
+     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+     [self.viewController dismissViewControllerAnimated:YES completion:nil];
+ }
+ 
 @end
