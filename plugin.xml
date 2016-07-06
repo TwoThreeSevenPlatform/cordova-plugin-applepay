@@ -14,7 +14,9 @@ xmlns:android="http://schemas.android.com/apk/res/android"
 	<preference name="STRIPE_PUBLISHABLE_KEY" />
 	<preference name="APPLE_PAY_MERCHANT" />
 	
-
+    <engines>
+        <engine name="cordova-ios" version=">=3.5.0" />
+    </engines>
 
     <platform name="ios">
 
